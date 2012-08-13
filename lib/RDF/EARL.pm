@@ -1,3 +1,26 @@
+=head1 NAME
+
+RDF::EARL - Generate W3C EARL test reports.
+
+=head1 VERSION
+
+This document describes RDF::EARL version 0.001.
+
+=head1 SYNOPSIS
+
+my $earl = RDF::EARL->new('http://thing-being-tested.com/');
+$earl->pass('http://example.org/test1');
+$earl->pass('http://example.org/test2');
+$earl->fail('http://example.org/test3', 'failure explanation');
+my $model = $earl->model;
+# $model is a RDF::Trine::Model containing the test results in EARL format
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
 package RDF::EARL;
 
 use strict;
@@ -155,3 +178,21 @@ sub _debug {
 	my $s		= RDF::Trine::Serializer->new('turtle', namespaces => $self->{map});
 	$s->serialize_model_to_file(\*STDERR, $model);
 }
+
+=back
+
+=head1 SEE ALSO
+
+L<http://www.perlrdf.org/>
+
+=head1 AUTHOR
+
+ Gregory Todd Williams <gwilliams@cpan.org>
+
+=head1 LICENSE
+
+Copyright (c) 2012 Gregory Todd Williams. This
+program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
