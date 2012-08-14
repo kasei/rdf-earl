@@ -4,7 +4,7 @@ RDF::EARL - Generate W3C Evaluation and Report Language (EARL) test reports.
 
 =head1 VERSION
 
-This document describes RDF::EARL version 0.001.
+This document describes RDF::EARL version 0.000_01.
 
 =head1 SYNOPSIS
 
@@ -49,7 +49,7 @@ use Scalar::Util qw(blessed);
 
 our ($VERSION);
 BEGIN {
-	$VERSION	= '0.001';
+	$VERSION	= '0.000_01';
 }
 
 my $DOAP	= RDF::Trine::Namespace->new('http://usefulinc.com/ns/doap#');
