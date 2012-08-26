@@ -4,7 +4,7 @@ RDF::EARL - Generate W3C Evaluation and Report Language (EARL) test reports.
 
 =head1 VERSION
 
-This document describes RDF::EARL version 0.000_01.
+This document describes RDF::EARL version 0.001.
 
 =head1 SYNOPSIS
 
@@ -41,15 +41,16 @@ as a string in the Turtle RDF format.
 
 package RDF::EARL;
 
-use strict;
+use v5.14;
 use warnings;
+use feature qw(unicode_strings);
 use RDF::Trine qw(iri blank literal statement);
 use RDF::Trine::Namespace qw(foaf rdf rdfs dc_terms xsd);
 use Scalar::Util qw(blessed);
 
 our ($VERSION);
 BEGIN {
-	$VERSION	= '0.000_01';
+	$VERSION	= '0.001';
 }
 
 my $DOAP	= RDF::Trine::Namespace->new('http://usefulinc.com/ns/doap#');
@@ -75,8 +76,7 @@ sub new {
 		%args	= @_;
 	}
 	my $subj	= $args{ subject } or die "RDF::EARL->new called without a subject IRI";
-	my $vers	= $VERSION;
-	$vers		=~ s/[.]/-/g;
+	my $vers	= $VERSION =~ s/[.]/-/gr;
 	my $asrt	= $args{ assertor } || "http://purl.org/NET/cpan-uri/dist/RDF-EARL/v_${vers}";
 	
 	foreach ($subj, $asrt) {
