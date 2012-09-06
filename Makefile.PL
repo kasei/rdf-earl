@@ -13,6 +13,7 @@ build_requires		'Test::Exception'			=> 0;
 
 perl_version		'5.008003';
 
+requires			'Moose'						=> 2;
 requires			'Scalar::Util'				=> 0;
 requires			'RDF::Trine'				=> 1.0;
 

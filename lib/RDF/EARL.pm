@@ -43,6 +43,8 @@ package RDF::EARL;
 
 use v5.14;
 use warnings;
+use Moose;
+use Moose::Util::TypeConstraints;
 use feature qw(unicode_strings);
 use RDF::Trine qw(iri blank literal statement);
 use RDF::Trine::Namespace qw(foaf rdf rdfs dc_terms xsd);
@@ -67,38 +69,56 @@ omitted, a default value for the RDF::EARL module will be used by default.
 
 =cut
 
-sub new {
+coerce 'RDF::Trine::Node::Resource',
+      from 'Str',
+      via { iri($_) };
+
+has model => (
+	is => 'ro',
+	isa => 'RDF::Trine::Model',
+	default => sub { RDF::Trine::Model->temporary_model },
+);
+
+has subject => (
+	is => 'rw',
+	isa => 'RDF::Trine::Node::Resource',
+	coerce => 1,
+	required => 1,
+);
+
+has assertor => (
+	is => 'rw',
+	isa => 'RDF::Trine::Node::Resource',
+	coerce => 1,
+	default => sub {
+		my $vers	= $VERSION =~ s/[.]/-/gr;
+		return iri("http://purl.org/NET/cpan-uri/dist/RDF-EARL/v_${vers}");
+	},
+);
+
+has map => (
+	is => 'ro',
+	isa => 'RDF::Trine::NamespaceMap',
+	default => sub {
+		return RDF::Trine::NamespaceMap->new({
+			rdf		=> $rdf,
+			rdfs	=> $rdfs,
+			dcterms	=> $dc_terms,
+			earl	=> $EARL,
+			
+		});
+	},
+);
+
+around BUILDARGS => sub {
+	my $orig	= shift;
 	my $class	= shift;
-	my %args;
 	if (scalar(@_) == 1) {
-		%args	= (subject => shift(@_));
+		return $class->$orig( subject => shift );
 	} else {
-		%args	= @_;
+		return $class->$orig( @_ );
 	}
-	my $subj	= $args{ subject } or die "RDF::EARL->new called without a subject IRI";
-	my $vers	= $VERSION =~ s/[.]/-/gr;
-	my $asrt	= $args{ assertor } || "http://purl.org/NET/cpan-uri/dist/RDF-EARL/v_${vers}";
-	
-	foreach ($subj, $asrt) {
-		$_	= iri($_) unless blessed($_);
-	}
-	
-	my $map		= RDF::Trine::NamespaceMap->new({
-		rdf		=> $rdf,
-		rdfs	=> $rdfs,
-		dcterms	=> $dc_terms,
-		earl	=> $EARL,
-		
-	});
-	my $model	= RDF::Trine::Model->temporary_model;
-	my $self	= bless({
-		model	=> $model,
-		subj	=> $subj,
-		asrt	=> $asrt,
-		map		=> $map,
-	}, $class);
-	return $self;
-}
+};
 
 =item C<< assertor >>
 
@@ -108,11 +128,6 @@ a RDF::EARL IRI like L<http://purl.org/NET/cpan-uri/dist/RDF-EARL/v_0-001>.
 
 =cut
 
-sub assertor {
-	my $self	= shift;
-	return $self->{asrt};
-}
-
 =item C<< subject >>
 
 Returns the RDF::Trine::Node::Resource object representing the thing being
@@ -120,21 +135,11 @@ tested. This is the IRI passed to the constructor as C<<subject>>.
 
 =cut
 
-sub subject {
-	my $self	= shift;
-	return $self->{subj};
-}
-
 =item C<< model >>
 
 Returns the RDF::Trine::Model object containing the EARL result data.
 
 =cut
-
-sub model {
-	my $self	= shift;
-	return $self->{model};
-}
 
 sub _assert {
 	my $self	= shift;
@@ -261,6 +266,11 @@ sub _debug {
 	my $s		= RDF::Trine::Serializer->new('turtle', namespaces => $self->{map});
 	$s->serialize_model_to_file(\*STDERR, $model);
 }
+
+__PACKAGE__->meta()->make_immutable();
+
+1;
+
 
 =back
 
